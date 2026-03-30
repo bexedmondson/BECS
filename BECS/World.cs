@@ -1,6 +1,10 @@
-﻿public class World
+﻿using System;
+using System.Collections.Generic;
+
+public class World
 {
     private Dictionary<int, Entity> entities = new();
+    public int entitiesCount => entities.Count;
 
     private OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
 
@@ -14,6 +18,11 @@
     public int GetComponentIndex(IComponent component)
     {
         Type t = component.GetType();
+        return GetComponentIndex(t);
+    }
+    
+    public int GetComponentIndex(Type t)
+    {
         int index = componentLookup.IndexOf(t);
         if (index != -1)
             return index;
