@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BECS", "BECS\BECS.csproj", "{9C593A73-0695-402B-B98E-9CCF71F09789}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BECS.Tests", "BECS.Tests\BECS.Tests.csproj", "{BA2EC020-8EEF-4066-9E94-0A1D7D28D9CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{9C593A73-0695-402B-B98E-9CCF71F09789}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C593A73-0695-402B-B98E-9CCF71F09789}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C593A73-0695-402B-B98E-9CCF71F09789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA2EC020-8EEF-4066-9E94-0A1D7D28D9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA2EC020-8EEF-4066-9E94-0A1D7D28D9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA2EC020-8EEF-4066-9E94-0A1D7D28D9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA2EC020-8EEF-4066-9E94-0A1D7D28D9CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
