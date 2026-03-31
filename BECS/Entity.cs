@@ -31,47 +31,41 @@ public record Entity
 
     public bool TryAdd<T>(T component) where T : IComponent
     {
-        int index = world.GetComponentIndex(component);
+        if (Has<T>())
+            return false;
+        
+        int index = world.GetComponentIndex<T>();
         if (index >= componentMask.Length)
         {
             componentMask.Length = index + 1;
-            componentMask.Set(index, true);
-            return true;
         }
         
-        if (componentMask.Get(index))
-            return false;
-        
         componentMask.Set(index, true);
+        world.SetComponent(this, component);
         
-        //TODO remove in World
         return true;
     }
 
     public bool TryReplace<T>(T component) where T : IComponent
     {
-        int index = world.GetComponentIndex(component);
-        if (index >= componentMask.Length)
-            return false;
-        if (!componentMask.Get(world.GetComponentIndex(component)))
+        if (!Has<T>())
             return false;
         
+        world.SetComponent(this, component);
         
         return true;
     }
 
     public bool TryRemove<T>() where T : IComponent
     {
-        int index = world.GetComponentIndex(typeof(T));
-        if (index >= componentMask.Length)
+        if (!Has<T>())
             return false;
 
-        if (!componentMask.Get(index))
-            return false;
-
-        componentMask.Set(index, false);
+        int index = world.GetComponentIndex<T>();
         
-        //TODO remove in World
+        componentMask.Set(index, false);
+        world.UnsetComponent<T>(this);
+        
         return true;
     }
 
@@ -82,5 +76,17 @@ public record Entity
             return false;
 
         return componentMask.Get(index);
+    }
+
+    public bool TryGet<T>(out T component) where T : IComponent
+    {
+        if (!Has<T>())
+        {
+            component = default;
+            return false;
+        }
+
+        component = world.GetComponent<T>(this);
+        return true;
     }
 }
