@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Text;
+using System.Text.Json;
 
 public class World
 {
@@ -9,6 +11,11 @@ public class World
     public int componentTypeCount => componentLookup.Count;
 
     public Action<Entity> OnEntityCreated;
+
+    public World()
+    {
+        
+    }
 
     public Entity CreateEntity()
     {
@@ -195,5 +202,43 @@ public class World
     public Result Query()
     {
         return new Result(this);
+    }
+
+    public string Serialise()
+    {
+        Dictionary<int, List<string>> entitySerialisedComponentMap = new();
+        Dictionary<int, List<IComponent>> entityComponentMap = new();
+        foreach (var kvp in entities)
+        {
+
+            entityComponentMap[kvp.Key] = new();
+            entitySerialisedComponentMap[kvp.Key] = new();
+        }
+
+        var serializerOptions = new JsonSerializerOptions{
+            Converters ={
+                new ComponentConverter()
+            },
+            //WriteIndented = true,
+            PropertyNameCaseInsensitive = true
+        };
+
+        foreach (var typeComponentMapKvp in componentLookup)
+        {
+            foreach (var entityComponentKvp in typeComponentMapKvp.Value)
+            {
+                entityComponentMap[entityComponentKvp.Key].Add(entityComponentKvp.Value);
+                entitySerialisedComponentMap[entityComponentKvp.Key].Add(
+                    JsonSerializer.Serialize(entityComponentKvp.Value, serializerOptions)
+                );
+            }
+        }
+
+        return JsonSerializer.Serialize(entityComponentMap, serializerOptions);
+    }
+
+    public void Deserialise(string json)
+    {
+        //JsonSerializer.
     }
 }

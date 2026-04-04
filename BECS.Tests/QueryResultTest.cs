@@ -63,6 +63,7 @@ public class QueryResultTest
     public void QueryResultHas_OneWithOneWithout_ResultLengthOne()
     {
         World world = new World();
+        world.CreateEntity();
         var entity = world.CreateEntity();
         entity.TryAdd(new TestComponent());
 
