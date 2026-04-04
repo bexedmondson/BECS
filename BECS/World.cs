@@ -8,10 +8,13 @@ public class World
     internal OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
     public int componentTypeCount => componentLookup.Count;
 
+    public Action<Entity> OnEntityCreated;
+
     public Entity CreateEntity()
     {
         var entity = new Entity(this);
         entities[entity.id] = entity;
+        OnEntityCreated?.Invoke(entity);
         return entity;
     }
 
