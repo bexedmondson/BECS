@@ -54,6 +54,8 @@ public record Entity
         componentMask.Set(index, true);
         world.SetComponent(this, component);
         
+        
+        
         return true;
     }
 

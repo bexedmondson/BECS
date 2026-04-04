@@ -10,7 +10,24 @@ public class World
     internal OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
     public int componentTypeCount => componentLookup.Count;
 
+    #region Events
     public Action<Entity> OnEntityCreated;
+    private Dictionary<Type, List<Action<Entity>>> componentAddedEventMap = new();
+    public void SubscribeOnComponentSet<T>(Action<Entity> subscriber) where T : IComponent
+    {
+        var t = typeof(T);
+        if (!componentAddedEventMap.ContainsKey(t))
+            componentAddedEventMap[t] = new();
+        componentAddedEventMap[t].Add(subscriber);
+    }
+    public void UnsubscribeOnComponentSet<T>(Action<Entity> subscriber) where T : IComponent
+    {
+        var t = typeof(T);
+        if (!componentAddedEventMap.ContainsKey(t))
+            return;
+        componentAddedEventMap[t].Remove(subscriber);
+    }
+    #endregion //Events
 
     public Entity CreateEntity()
     {
@@ -45,6 +62,14 @@ public class World
             entityComponentMap = componentLookup[t] = new Dictionary<int, IComponent>();
         }
         entityComponentMap[entity.id] = component;
+
+        if (componentAddedEventMap.TryGetValue(t, out var actions))
+        {
+            foreach (var action in actions)
+            {
+                action.Invoke(entity);
+            }
+        }
     }
 
     public void UnsetComponent<T>(Entity entity) where T : IComponent
@@ -203,6 +228,7 @@ public class World
         return new Result(this);
     }
 
+    #region Serialisation
     public string Serialise(bool easyToRead = false)
     {
         OrderedDictionary<Type, string> typeToFullNameMap = new();
@@ -282,4 +308,5 @@ public class World
         
         Entity.SetNextId(this);
     }
+    #endregion //Serialisation
 }
