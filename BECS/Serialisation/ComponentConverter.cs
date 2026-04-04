@@ -3,10 +3,9 @@ using System.Text.Json.Serialization;
 
 public class ComponentConverter : JsonConverter<IComponent>
 {
-    public override IComponent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override IComponent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        //JsonSerializer.Deserialize(reader., typeToConvert, options);
-        return null;
+        return (IComponent?)JsonSerializer.Deserialize(ref reader, typeToConvert, options);
     }
 
     public override void Write(Utf8JsonWriter writer, IComponent value, JsonSerializerOptions options)

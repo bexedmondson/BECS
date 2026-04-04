@@ -3,6 +3,11 @@ using System.Collections;
 public record Entity
 {
     private static int s_nextId = 0;
+
+    public static void SetNextId(World world) //in an attempt to only let World call this
+    {
+        s_nextId = world.entitiesCount;
+    }
     
     private World world { get; init; }
     public int id { get; init; }
@@ -27,6 +32,12 @@ public record Entity
         this.world = world;
         id = s_nextId;
         s_nextId++;
+    }
+
+    public Entity(World world, int id, BitArray componentMask)
+    {
+        this.id = id;
+        this.componentMask = componentMask;
     }
 
     public bool TryAdd<T>(T component) where T : IComponent

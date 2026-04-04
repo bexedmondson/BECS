@@ -12,11 +12,6 @@ public class World
 
     public Action<Entity> OnEntityCreated;
 
-    public World()
-    {
-        
-    }
-
     public Entity CreateEntity()
     {
         var entity = new Entity(this);
@@ -24,6 +19,8 @@ public class World
         OnEntityCreated?.Invoke(entity);
         return entity;
     }
+    
+    #region ComponentHandling
 
     public int GetComponentIndex<T>() where T : IComponent
     {
@@ -80,6 +77,8 @@ public class World
         
         return entityComponentMap.Count;
     }
+    
+    #endregion //ComponentHandling
     
     public class Result
     {
@@ -204,41 +203,83 @@ public class World
         return new Result(this);
     }
 
-    public string Serialise()
+    public string Serialise(bool easyToRead = false)
     {
-        Dictionary<int, List<string>> entitySerialisedComponentMap = new();
-        Dictionary<int, List<IComponent>> entityComponentMap = new();
+        OrderedDictionary<Type, string> typeToFullNameMap = new();
+        foreach (var kvp in componentLookup)
+        {
+            typeToFullNameMap[kvp.Key] = kvp.Key.AssemblyQualifiedName;
+        }
+        
+        Dictionary<int, Dictionary<int, IComponent>> entityComponentMap = new();
         foreach (var kvp in entities)
         {
-
             entityComponentMap[kvp.Key] = new();
-            entitySerialisedComponentMap[kvp.Key] = new();
         }
-
-        var serializerOptions = new JsonSerializerOptions{
-            Converters ={
-                new ComponentConverter()
-            },
-            //WriteIndented = true,
-            PropertyNameCaseInsensitive = true
-        };
 
         foreach (var typeComponentMapKvp in componentLookup)
         {
+            var typeIndex = typeToFullNameMap.IndexOf(typeComponentMapKvp.Key);
             foreach (var entityComponentKvp in typeComponentMapKvp.Value)
             {
-                entityComponentMap[entityComponentKvp.Key].Add(entityComponentKvp.Value);
-                entitySerialisedComponentMap[entityComponentKvp.Key].Add(
-                    JsonSerializer.Serialize(entityComponentKvp.Value, serializerOptions)
-                );
+                entityComponentMap[entityComponentKvp.Key][typeIndex] = entityComponentKvp.Value;
             }
         }
 
-        return JsonSerializer.Serialize(entityComponentMap, serializerOptions);
+        var worldData = new {
+            types = typeToFullNameMap.Values,
+            entities = entityComponentMap
+        };
+
+        return JsonSerializer.Serialize(
+            worldData, 
+            new JsonSerializerOptions{
+                Converters = { new ComponentConverter() },
+                WriteIndented = easyToRead,
+                PropertyNameCaseInsensitive = true
+            }
+        );
     }
 
     public void Deserialise(string json)
     {
-        //JsonSerializer.
+        this.entities.Clear();
+        this.componentLookup.Clear();
+        
+        var worldData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+
+        var typeNamesArray = ((JsonElement)worldData["types"]).Deserialize<string[]>();
+
+        var typeMapping = new Type[typeNamesArray.Length];
+        for (int i = 0; i < typeNamesArray.Length; i++)
+        {
+            typeMapping[i] = Type.GetType(typeNamesArray[i]);
+        }
+
+        var entityComponentMapping = ((JsonElement)worldData["entities"]).Deserialize<Dictionary<int, Dictionary<int, object>>>();
+        foreach (var entityKvp in entityComponentMapping)
+        {
+            var entityId = entityKvp.Key;
+            var componentMask = new BitArray(entityKvp.Value.Count);
+            
+            foreach (var componentKvp in entityKvp.Value)
+            {
+                componentMask[componentKvp.Key] = true;
+                
+                var componentType = typeMapping[componentKvp.Key];
+                var component = ((JsonElement)componentKvp.Value).Deserialize(componentType);
+
+                if (!componentLookup.TryGetValue(componentType, out var entityComponentMap))
+                {
+                    componentLookup[componentType] = new();
+                }
+                componentLookup[componentType][entityId] = (IComponent)component;
+            }
+            
+            var newEntity = new Entity(this, entityId, componentMask);
+            this.entities[entityId] = newEntity;
+        }
+        
+        Entity.SetNextId(this);
     }
 }
