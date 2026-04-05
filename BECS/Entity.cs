@@ -11,6 +11,8 @@ public record Entity
     
     private World world { get; init; }
     public int id { get; init; }
+
+    public Action<Entity> OnEntityUpdated;
     
     private BitArray componentMask { get; } = new(0);
     public int componentCount
@@ -54,7 +56,7 @@ public record Entity
         componentMask.Set(index, true);
         world.SetComponent(this, component);
         
-        
+        OnEntityUpdated?.Invoke(this);
         
         return true;
     }
@@ -65,6 +67,8 @@ public record Entity
             return false;
         
         world.SetComponent(this, component);
+        
+        OnEntityUpdated?.Invoke(this);
         
         return true;
     }
@@ -78,6 +82,8 @@ public record Entity
         
         componentMask.Set(index, false);
         world.UnsetComponent<T>(this);
+        
+        OnEntityUpdated?.Invoke(this);
         
         return true;
     }
