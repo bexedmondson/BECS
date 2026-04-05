@@ -17,6 +17,9 @@ public class ComponentConverter : JsonConverter<IComponent>
                 break;
             default:
             {
+                if (!value.ShouldSerialise())
+                    break;
+                
                 var type = value.GetType();
                 JsonSerializer.Serialize(writer, value, type, options);
                 break;

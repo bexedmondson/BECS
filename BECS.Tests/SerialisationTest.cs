@@ -72,6 +72,20 @@ public class SerialisationTest
     }
     
     [Fact]
+    public void Serialise_OneEntityWithNonSerialisedComponent_TypeAndValueNotSerialised()
+    {
+        World world = new World();
+        var entity = world.CreateEntity();
+        entity.TryAdd(new TestNotSerialisedComponent());
+
+        var serialised = world.Serialise();
+
+        serialised.Should().Be("{\"types\":[],\"entities\":{\"0\":{}}}");
+        world.componentTypeCount.Should().Be(1);
+        entity.componentCount.Should().Be(1);
+    }
+    
+    [Fact]
     public void Serialise_OneWithOneWithout_HasValuesForOne()
     {
         World world = new World();
@@ -138,7 +152,7 @@ public class SerialisationTest
     }
     
     [Fact]
-    public void Serialise_OneEntitiesWithTwoComponents_HasValuesForBoth()
+    public void Serialise_OneEntityWithTwoComponents_HasValuesForBoth()
     {
         World world = new World();
         var entity = world.CreateEntity();
@@ -151,11 +165,42 @@ public class SerialisationTest
     }
     
     [Fact]
-    public void Deserialise_OneEntitiesWithTwoComponents_HasValuesForBoth()
+    public void Deserialise_OneEntityWithTwoComponents_HasValuesForBoth()
     {
         World world = new World();
         world.Deserialise("{\"types\":[\"TestComponent, BECS.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"TestOtherComponent, BECS.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"],\"entities\":{\"0\":{\"0\":{\"testInt\":123},\"1\":{\"field\":{\"hello\":\"hi\"}}}}}");
         world.entitiesCount.Should().Be(1);
         world.componentTypeCount.Should().Be(2);
+    }
+    
+    [Fact]
+    public void Serialise_OneEntityWithTwoComponentsFirstNotSerialised_HasValuesForSerialisedOnly()
+    {
+        //essentially checking that the indexes in the entity component dict still work fine
+        World world = new World();
+        var entity = world.CreateEntity();
+        entity.TryAdd(new TestNotSerialisedComponent());
+        entity.TryAdd(new TestComponent());
+
+        var serialised = world.Serialise();
+
+        serialised.Should().Be("{\"types\":[\"TestComponent, BECS.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"],\"entities\":{\"0\":{\"0\":{\"testInt\":123}}}}");
+        world.componentTypeCount.Should().Be(2);
+        entity.componentCount.Should().Be(2);
+    }
+    
+    [Fact]
+    public void Serialise_OneEntityWithTwoComponentsSecondNotSerialised_HasValuesForSerialisedOnly()
+    {
+        World world = new World();
+        var entity = world.CreateEntity();
+        entity.TryAdd(new TestComponent());
+        entity.TryAdd(new TestNotSerialisedComponent());
+
+        var serialised = world.Serialise();
+
+        serialised.Should().Be("{\"types\":[\"TestComponent, BECS.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"],\"entities\":{\"0\":{\"0\":{\"testInt\":123}}}}");
+        world.componentTypeCount.Should().Be(2);
+        entity.componentCount.Should().Be(2);
     }
 }

@@ -7,6 +7,8 @@ public class World
     private Dictionary<int, Entity> entities = new();
     public int entitiesCount => entities.Count;
 
+    private Dictionary<Type, bool> shouldSerialiseTypeMap = new();
+
     internal OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
     public int componentTypeCount => componentLookup.Count;
 
@@ -41,16 +43,13 @@ public class World
 
     public int GetComponentIndex<T>() where T : IComponent
     {
-        return GetComponentIndex(typeof(T));
-    }
-    
-    public int GetComponentIndex(Type t)
-    {
+        var t = typeof(T);
         int index = componentLookup.IndexOf(t);
         if (index != -1)
             return index;
 
         componentLookup[t] = new Dictionary<int, IComponent>();
+        shouldSerialiseTypeMap[t] = T.shouldSerialise;
         return componentLookup.IndexOf(t);
     }
 
@@ -60,6 +59,8 @@ public class World
         if (!componentLookup.TryGetValue(t, out var entityComponentMap))
         {
             entityComponentMap = componentLookup[t] = new Dictionary<int, IComponent>();
+            
+            shouldSerialiseTypeMap[t] = T.shouldSerialise;
         }
         entityComponentMap[entity.id] = component;
 
@@ -234,6 +235,9 @@ public class World
         OrderedDictionary<Type, string> typeToFullNameMap = new();
         foreach (var kvp in componentLookup)
         {
+            if (!shouldSerialiseTypeMap[kvp.Key])
+                continue;
+            
             typeToFullNameMap[kvp.Key] = kvp.Key.AssemblyQualifiedName;
         }
         
@@ -245,6 +249,9 @@ public class World
 
         foreach (var typeComponentMapKvp in componentLookup)
         {
+            if (!shouldSerialiseTypeMap[typeComponentMapKvp.Key])
+                continue;
+            
             var typeIndex = typeToFullNameMap.IndexOf(typeComponentMapKvp.Key);
             foreach (var entityComponentKvp in typeComponentMapKvp.Value)
             {

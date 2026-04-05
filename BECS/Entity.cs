@@ -84,7 +84,7 @@ public record Entity
 
     public bool Has<T>() where T : IComponent
     {
-        int index = world.GetComponentIndex(typeof(T));
+        int index = world.GetComponentIndex<T>();
         if (index >= componentMask.Length)
             return false;
 
