@@ -45,10 +45,13 @@ public record Entity
 
     public bool TryAdd<T>(T component) where T : IComponent
     {
-        if (Has<T>())
+        if (component.GetType().IsAbstract)
             return false;
         
-        int index = world.GetComponentIndex<T>();
+        if (HasComponentType(component))
+            return false;
+        
+        int index = world.GetComponentTypeIndex(component);
         if (index >= componentMask.Length)
         {
             componentMask.Length = index + 1;
@@ -64,7 +67,10 @@ public record Entity
 
     public bool TryReplace<T>(T component) where T : IComponent
     {
-        if (!Has<T>())
+        if (component.GetType().IsAbstract)
+            return false;
+        
+        if (!HasComponentType(component))
             return false;
         
         world.SetComponent(this, component);
@@ -88,9 +94,24 @@ public record Entity
         
         return true;
     }
+    
+    private bool HasComponentType<T>(T component) where T : IComponent
+    {
+        if (component.GetType().IsAbstract)
+            return false;
+        
+        int index = world.GetComponentTypeIndex(component);
+        if (index >= componentMask.Length)
+            return false;
+
+        return componentMask.Get(index);
+    }
 
     public bool Has<T>() where T : IComponent
     {
+        if (typeof(T).IsAbstract)
+            return false;
+        
         int index = world.GetComponentIndex<T>();
         if (index >= componentMask.Length)
             return false;

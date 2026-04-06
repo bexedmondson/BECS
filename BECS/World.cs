@@ -53,6 +53,18 @@ public class World
         return componentLookup.IndexOf(t);
     }
 
+    public int GetComponentTypeIndex<T>(T componentT) where T : IComponent
+    {
+        var t = componentT.GetType();
+        int index = componentLookup.IndexOf(t);
+        if (index != -1)
+            return index;
+
+        componentLookup[t] = new Dictionary<int, IComponent>();
+        shouldSerialiseTypeMap[t] = T.shouldSerialise;
+        return componentLookup.IndexOf(t);
+    }
+
     public void SetComponent<T>(Entity entity, T component) where T : IComponent
     {
         Type t = component.GetType();
