@@ -4,12 +4,12 @@ using System.Text.Json;
 
 public class World
 {
-    private Dictionary<int, Entity> entities = new();
+    protected Dictionary<int, Entity> entities = new();
     public int entitiesCount => entities.Count;
 
-    private Dictionary<Type, bool> shouldSerialiseTypeMap = new();
+    protected Dictionary<Type, bool> shouldSerialiseTypeMap = new();
 
-    internal OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
+    protected OrderedDictionary<Type, Dictionary<int, IComponent>> componentLookup = new();
     public int componentTypeCount => componentLookup.Count;
 
     #region Events

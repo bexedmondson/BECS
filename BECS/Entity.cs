@@ -9,12 +9,12 @@ public record Entity
         s_nextId = world.entitiesCount;
     }
     
-    private World world { get; init; }
+    protected World world { get; init; }
     public int id { get; init; }
 
     public Action<Entity> OnEntityUpdated;
     
-    private BitArray componentMask { get; } = new(0);
+    protected BitArray componentMask { get; } = new(0);
     public int componentCount
     {
         get
