@@ -38,6 +38,7 @@ public record Entity
 
     public Entity(World world, int id, BitArray componentMask)
     {
+        this.world = world;
         this.id = id;
         this.componentMask = componentMask;
     }
