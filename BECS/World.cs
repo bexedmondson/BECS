@@ -14,6 +14,8 @@ public class World
 
     #region Events
     public Action<Entity> OnEntityCreated;
+    public Action<Entity> OnEntityRemoved;
+    
     private Dictionary<Type, List<Action<Entity>>> componentAddedEventMap = new();
     public void SubscribeOnComponentSet<T>(Action<Entity> subscriber) where T : IComponent
     {
@@ -37,6 +39,19 @@ public class World
         entities[entity.id] = entity;
         OnEntityCreated?.Invoke(entity);
         return entity;
+    }
+
+    public void RemoveEntity(Entity entity)
+    {
+        for (int i = 0; i < componentLookup.Count; i++)
+        {
+            if (entity.HasComponentIndex(i))
+                componentLookup.GetAt(i).Value.Remove(entity.id);
+        }
+
+        entities.Remove(entity.id);
+        
+        OnEntityRemoved?.Invoke(entity);
     }
     
     #region ComponentHandling

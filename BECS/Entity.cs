@@ -101,10 +101,7 @@ public record Entity
             return false;
         
         int index = world.GetComponentTypeIndex(component);
-        if (index >= componentMask.Length)
-            return false;
-
-        return componentMask.Get(index);
+        return HasComponentIndex(index);
     }
 
     public bool Has<T>() where T : IComponent
@@ -113,10 +110,15 @@ public record Entity
             return false;
         
         int index = world.GetComponentIndex<T>();
-        if (index >= componentMask.Length)
+        return HasComponentIndex(index);
+    }
+
+    public bool HasComponentIndex(int componentIndex)
+    {
+        if (componentIndex >= componentMask.Length)
             return false;
 
-        return componentMask.Get(index);
+        return componentMask.Get(componentIndex);
     }
 
     public bool TryGet<T>(out T component) where T : IComponent

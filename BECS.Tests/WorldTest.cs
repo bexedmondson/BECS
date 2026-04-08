@@ -13,6 +13,17 @@ public class WorldTest
         world.entitiesCount.Should().Be(1);
         world.GetComponentCount<TestComponent>().Should().Be(0);
     }
+    
+    [Fact]
+    public void RemoveEntity_AfterCreateOne_ContainsZeroEntities()
+    {
+        World world = new World();
+        var entity = world.CreateEntity();
+        
+        world.RemoveEntity(entity);
+        
+        world.entitiesCount.Should().Be(0);
+    }
 
     [Fact]
     public void SetComponent_SetFirstTime_OneTypeRegistered()
