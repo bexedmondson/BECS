@@ -170,7 +170,7 @@ public class World
                 int entityId = entityIds[i];
                 if (componentMap.TryGetValue(entityId, out var component))
                 {
-                     newComponentList.Add((T)component);
+                     newComponentList[i] = (T)component;
                 }
                 else
                 {
