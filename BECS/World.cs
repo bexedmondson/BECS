@@ -163,14 +163,14 @@ public class World
                 return this;
             }
 
-            var newComponentList = new List<T>(entityIds.Count);
+            var newComponentList = new List<T>(new T[entityIds.Count]);
 
             for (int i = entityIds.Count - 1; i >= 0; i--)
             {
                 int entityId = entityIds[i];
                 if (componentMap.TryGetValue(entityId, out var component))
                 {
-                     newComponentList[i] = (T)component;
+                    newComponentList[i] = (T)component;
                 }
                 else
                 {
