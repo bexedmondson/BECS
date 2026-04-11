@@ -4,9 +4,9 @@ public record Entity
 {
     private static int s_nextId = 0;
 
-    public static void SetNextId(World world) //in an attempt to only let World call this
+    public static void SetNextId(World world, int nextId) //in an attempt to only let World call this
     {
-        s_nextId = world.entitiesCount;
+        s_nextId = nextId;
     }
     
     protected World world { get; init; }

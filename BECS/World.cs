@@ -339,8 +339,15 @@ public class World
             var newEntity = new Entity(this, entityId, componentMask);
             this.entities[entityId] = newEntity;
         }
+
+        int maxId = 0;
+        foreach (var id in entities.Keys)
+        {
+            if (maxId < id)
+                maxId = id;
+        }
         
-        Entity.SetNextId(this);
+        Entity.SetNextId(this, maxId + 1);
     }
     #endregion //Serialisation
 }
