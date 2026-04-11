@@ -102,6 +102,21 @@ public class QueryResultTest
     }
     
     [Fact]
+    public void QueryResultNot_TwoEntitiesWithComponentOneWithOther_ResultLengthOne()
+    {
+        World world = new World();
+        var entity1 = world.CreateEntity();
+        entity1.TryAdd(new TestComponent());
+        entity1.TryAdd(new TestOtherComponent());
+        var entity2 = world.CreateEntity();
+        entity2.TryAdd(new TestComponent());
+
+        var result = world.Query().Not<TestOtherComponent>();
+
+        result.Count.Should().Be(1);
+    }
+    
+    [Fact]
     public void QueryResultHasHas_TwoEntitiesWithComponentOneWithOther_ResultLengthOne()
     {
         World world = new World();
@@ -112,6 +127,35 @@ public class QueryResultTest
         entity2.TryAdd(new TestComponent());
 
         var result = world.Query().Has<TestComponent>().Has<TestOtherComponent>();
+
+        result.Count.Should().Be(1);
+    }
+    
+    [Fact]
+    public void QueryResultHasNot_TwoEntitiesWithComponentOneWithOther_ResultLengthOne()
+    {
+        World world = new World();
+        var entity1 = world.CreateEntity();
+        entity1.TryAdd(new TestComponent());
+        entity1.TryAdd(new TestOtherComponent());
+        var entity2 = world.CreateEntity();
+        entity2.TryAdd(new TestComponent());
+
+        var result = world.Query().Has<TestComponent>().Not<TestOtherComponent>();
+
+        result.Count.Should().Be(1);
+    }
+    
+    [Fact]
+    public void QueryResultHasNot_OneEntityWithComponentOneWithOther_ResultLengthOne()
+    {
+        World world = new World();
+        var entity1 = world.CreateEntity();
+        entity1.TryAdd(new TestOtherComponent());
+        var entity2 = world.CreateEntity();
+        entity2.TryAdd(new TestComponent());
+
+        var result = world.Query().Has<TestComponent>().Not<TestOtherComponent>();
 
         result.Count.Should().Be(1);
     }

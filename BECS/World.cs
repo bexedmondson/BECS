@@ -187,6 +187,28 @@ public class World
             return this;
         }
         
+        public Result Not<T>() where T : IComponent
+        {
+            Type t = typeof(T);
+            if (!world.componentLookup.TryGetValue(t, out var componentMap))
+                return this;
+
+            for (int i = entityIds.Count - 1; i >= 0; i--)
+            {
+                int entityId = entityIds[i];
+                if (componentMap.TryGetValue(entityId, out var component))
+                {
+                    entityIds.RemoveAt(i);
+                    foreach (var kvp in componentLists)
+                    {
+                        kvp.Value.RemoveAt(i);
+                    }
+                }
+            }
+
+            return this;
+        }
+        
         public void Do(Action<Entity> action)
         {
             for (int i = 0; i < entityIds.Count; i++)
