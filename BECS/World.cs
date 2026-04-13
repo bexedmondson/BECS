@@ -186,6 +186,42 @@ public class World
 
             return this;
         }
+
+        public Result Filter<T>(Func<T, bool> filter) where T : IComponent
+        {
+            Type t = typeof(T);
+
+            if (!componentLists.ContainsKey(t))
+                throw new ComponentNotIncludedInQueryException();
+            
+            bool hasAny = world.componentLookup.TryGetValue(t, out var componentMap);
+            if (!hasAny)
+            {
+                entityIds.Clear();
+                foreach (var componentList in componentLists)
+                {
+                    componentList.Value.Clear();
+                }
+                return this;
+            }
+
+            for (int i = entityIds.Count - 1; i >= 0; i--)
+            {
+                int entityId = entityIds[i];
+                //above exception should ensure that Has<T> has already filtered these entities
+                componentMap.TryGetValue(entityId, out var component);
+                if (!filter((T)component))
+                {
+                    entityIds.RemoveAt(i);
+                    foreach (var kvp in componentLists)
+                    {
+                        kvp.Value.RemoveAt(i);
+                    }
+                }
+            }
+
+            return this;
+        }
         
         public Result Not<T>() where T : IComponent
         {
@@ -221,7 +257,7 @@ public class World
         {
             Type[] type = [typeof(T)];
             if (!HasTypes(type))
-                return;
+                throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
             {
@@ -235,7 +271,7 @@ public class World
         {
             Type[] types = [typeof(T1), typeof(T2)];
             if (!HasTypes(types))
-                return;
+                throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
             {
@@ -250,7 +286,7 @@ public class World
         {
             Type[] types = [typeof(T1), typeof(T2), typeof(T3)];
             if (!HasTypes(types))
-                return;
+                throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
             {

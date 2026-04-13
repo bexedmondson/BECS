@@ -177,6 +177,43 @@ public class QueryResultTest
     }
 
     [Fact]
+    public void QueryResultFilter_TwoItemsOneFits_FittingEntityInResult()
+    {
+        World world = new World();
+        var entity1 = world.CreateEntity();
+        entity1.TryAdd(new TestComponent());
+        var entity2 = world.CreateEntity();
+        entity2.TryAdd(new TestComponent(){testInt = 234});
+
+        var result = world.Query().Has<TestComponent>().Filter<TestComponent>(TestFilter);
+
+        result.Count.Should().Be(1);
+
+        int testInt = 0;
+        result.Do<TestComponent>((e, tc) => testInt = tc.testInt);
+        testInt.Should().Be(234);
+    }
+    
+    [Fact]
+    public void QueryResultFilter_TwoItemsOneFitsWrongParam_ExceptionThrown()
+    {
+        World world = new World();
+        var entity1 = world.CreateEntity();
+        entity1.TryAdd(new TestComponent());
+        var entity2 = world.CreateEntity();
+        entity2.TryAdd(new TestComponent(){testInt = 234});
+        
+        Action act = () => world.Query().Has<TestOtherComponent>().Filter<TestComponent>(TestFilter);
+
+        act.Should().Throw<ComponentNotIncludedInQueryException>();
+    }
+
+    private bool TestFilter(TestComponent testComponent)
+    {
+        return testComponent.testInt == 234;
+    }
+
+    [Fact]
     public void QueryResultDo_ZeroItemQuery_DoRunsZeroTimes()
     {
         World world = new World();
@@ -216,15 +253,15 @@ public class QueryResultTest
     }
     
     [Fact]
-    public void QueryResultDo_OneItemQueryWrongSignature_DoRunsZeroTimes()
+    public void QueryResultDo_OneItemQueryWrongSignature_ThrowsException()
     {
         World world = new World();
         var entity = world.CreateEntity();
         entity.TryAdd(new TestComponent());
         int count = 0;
         
-        world.Query().Has<TestComponent>().Do((Entity e, TestOtherComponent t) => { count++; });
+        Action act = () => world.Query().Has<TestComponent>().Do((Entity e, TestOtherComponent t) => { count++; });
         
-        count.Should().Be(0);
+        act.Should().Throw<ComponentNotIncludedInQueryException>();
     }
 }
