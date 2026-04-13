@@ -256,7 +256,7 @@ public class World
         public void Do<T>(Action<Entity, T> action) where T : IComponent
         {
             Type[] type = [typeof(T)];
-            if (!HasTypes(type))
+            if (entityIds.Count > 0 && !HasTypes(type))
                 throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
@@ -270,7 +270,7 @@ public class World
         public void Do<T1, T2>(Action<Entity, T1, T2> action) where T1 : IComponent where T2 : IComponent
         {
             Type[] types = [typeof(T1), typeof(T2)];
-            if (!HasTypes(types))
+            if (entityIds.Count > 0 && !HasTypes(types))
                 throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
@@ -285,7 +285,7 @@ public class World
         public void Do<T1, T2, T3>(Action<Entity, T1, T2, T3> action) where T1 : IComponent where T2 : IComponent where T3 : IComponent
         {
             Type[] types = [typeof(T1), typeof(T2), typeof(T3)];
-            if (!HasTypes(types))
+            if (entityIds.Count > 0 && !HasTypes(types))
                 throw new ComponentNotIncludedInQueryException();
                 
             for (int i = 0; i < entityIds.Count; i++)
@@ -307,6 +307,13 @@ public class World
             }
             return true;
         }
+
+        public Entity Get(int i)
+        {
+            if (i >= entityIds.Count)
+                return null;    
+            return world.entities[entityIds[i]]; 
+        }           
     }
 
     public Result Query()
